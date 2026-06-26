@@ -4,6 +4,9 @@ import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './modules/auth/auth.module';
+import { CarriersModule } from './modules/carriers/carriers.module';
+import { ClientsModule } from './modules/clients/clients.module';
+import { TenantsModule } from './modules/tenants/tenants.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 
 @Module({
@@ -26,6 +29,9 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
       synchronize: process.env.NODE_ENV !== 'production',
     }),
     AuthModule,
+    TenantsModule,
+    ClientsModule,
+    CarriersModule,
   ],
   providers: [
     {
