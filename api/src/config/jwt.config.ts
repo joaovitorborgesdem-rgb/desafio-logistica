@@ -1,0 +1,7 @@
+export const jwtConfig = {
+  accessSecret: process.env.JWT_ACCESS_SECRET ?? 'dev-access-secret-change-me',
+  refreshSecret: process.env.JWT_REFRESH_SECRET ?? 'dev-refresh-secret-change-me',
+  accessExpiresIn: '15m',
+  refreshExpiresInDays: 7,
+  bcryptRounds: 10,
+} as const;
