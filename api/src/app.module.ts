@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
@@ -6,12 +7,19 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './modules/auth/auth.module';
 import { CarriersModule } from './modules/carriers/carriers.module';
 import { ClientsModule } from './modules/clients/clients.module';
+import { FreightModule } from './modules/freight/freight.module';
 import { TenantsModule } from './modules/tenants/tenants.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    BullModule.forRoot({
+      connection: {
+        host: process.env.REDIS_HOST ?? 'localhost',
+        port: parseInt(process.env.REDIS_PORT ?? '6379', 10),
+      },
+    }),
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
@@ -32,6 +40,7 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
     TenantsModule,
     ClientsModule,
     CarriersModule,
+    FreightModule,
   ],
   providers: [
     {
