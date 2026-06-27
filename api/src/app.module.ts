@@ -9,6 +9,7 @@ import { CarriersModule } from './modules/carriers/carriers.module';
 import { ClientsModule } from './modules/clients/clients.module';
 import { FreightModule } from './modules/freight/freight.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { UploadModule } from './modules/upload/upload.module';
 import { TenantsModule } from './modules/tenants/tenants.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 
@@ -43,6 +44,7 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
     CarriersModule,
     FreightModule,
     DashboardModule,
+    UploadModule,
   ],
   providers: [
     {
