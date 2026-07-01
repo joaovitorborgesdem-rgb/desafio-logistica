@@ -30,13 +30,10 @@ export class AuthService {
     const existingUser = await this.userRepository.findOne({
       where: { tenantId: dto.tenantId, email: dto.email.toLowerCase() },
     });
-
     if (existingUser) {
       throw new ConflictException('E-mail já cadastrado neste tenant');
     }
-
     const passwordHash = await bcrypt.hash(dto.password, jwtConfig.bcryptRounds);
-
     const user = this.userRepository.create({
       tenantId: dto.tenantId,
       email: dto.email.toLowerCase(),
@@ -45,57 +42,46 @@ export class AuthService {
       mfaEnabled: false,
       mfaSecret: null,
     });
-
     const saved = await this.userRepository.save(user);
     this.logger.log(`Usuário registrado: ${saved.id} no tenant ${saved.tenantId}`);
-
     const { passwordHash: _, ...result } = saved;
     return result;
   }
 
   async login(dto: LoginDto): Promise<AuthTokensResponse> {
     const user = await this.userRepository.findOne({
-      where: { tenantId: dto.tenantId, email: dto.email.toLowerCase() },
+      where: { email: dto.email.toLowerCase() },
     });
-
     if (!user) {
       throw new UnauthorizedException('Credenciais inválidas');
     }
-
     const passwordValid = await bcrypt.compare(dto.password, user.passwordHash);
-
     if (!passwordValid) {
       throw new UnauthorizedException('Credenciais inválidas');
     }
-
     return this.issueTokens(user);
   }
 
   async refresh(rawRefreshToken: string): Promise<AuthTokensResponse> {
     const refreshToken = await this.refreshTokenService.findValidToken(rawRefreshToken);
     const user = refreshToken.user;
-
     if (!user) {
       throw new UnauthorizedException('Usuário não encontrado');
     }
-
     await this.refreshTokenService.revoke(refreshToken);
     this.logger.log(`Refresh token rotacionado para usuário ${user.id}`);
-
     return this.issueTokens(user);
   }
 
   async logout(rawRefreshToken: string): Promise<{ message: string }> {
     await this.refreshTokenService.revokeByRawToken(rawRefreshToken);
     this.logger.log('Logout realizado com sucesso');
-
     return { message: 'Logout realizado com sucesso' };
   }
 
   private async issueTokens(user: User): Promise<AuthTokensResponse> {
     const accessToken = this.tokenService.generateAccessToken(user);
     const { token: refreshToken } = await this.refreshTokenService.createForUser(user);
-
     return this.tokenService.buildAuthResponse(accessToken, refreshToken);
   }
 }

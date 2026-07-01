@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { TrendingUp, Package, Users, Truck } from 'lucide-react';
+import { TrendingUp, Package, Truck } from 'lucide-react';
 
 interface Summary {
   total_simulations: number;
@@ -37,7 +37,7 @@ export default function DashboardPage() {
           fetch('http://localhost:3000/dashboard/insights', { headers }).then((r) => r.json()),
         ]);
         setSummary(s);
-        setInsights(i);
+        setInsights(Array.isArray(i) ? i : []);
       } catch {
         console.error('Erro ao carregar dashboard');
       } finally {
@@ -58,7 +58,7 @@ export default function DashboardPage() {
   const cards = [
     { label: 'Total de Simulações', value: summary?.total_simulations ?? 0, icon: Package, color: 'text-blue-400' },
     { label: 'Simulações este mês', value: summary?.simulations_this_month ?? 0, icon: TrendingUp, color: 'text-green-400' },
-    { label: 'Valor médio de carga', value: `R$ ${(summary?.avg_freight_value ?? 0).toFixed(2)}`, icon: Users, color: 'text-yellow-400' },
+    { label: 'Valor médio de carga', value: `R$ ${(summary?.avg_freight_value ?? 0).toFixed(2)}`, icon: TrendingUp, color: 'text-yellow-400' },
     { label: 'Transportadora mais usada', value: summary?.most_used_carrier ?? '-', icon: Truck, color: 'text-purple-400' },
   ];
 
@@ -67,6 +67,9 @@ export default function DashboardPage() {
     warning: 'border-yellow-600/30 bg-yellow-600/10 text-yellow-400',
     critical: 'border-red-600/30 bg-red-600/10 text-red-400',
   };
+
+  const topOrigins = summary?.top_origins ?? [];
+  const insightsList = insights ?? [];
 
   return (
     <div className="space-y-6">
@@ -90,11 +93,11 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-[#1E293B] border border-slate-700 rounded-xl p-6">
           <h2 className="text-white font-semibold mb-4">Principais Origens</h2>
-          {summary?.top_origins.length === 0 ? (
+          {topOrigins.length === 0 ? (
             <p className="text-slate-400 text-sm">Nenhuma simulação ainda</p>
           ) : (
             <ul className="space-y-2">
-              {summary?.top_origins.map((o, i) => (
+              {topOrigins.map((o, i) => (
                 <li key={i} className="flex items-center justify-between text-sm">
                   <span className="text-slate-300">{o.city}</span>
                   <span className="text-blue-400 font-medium">{o.count} simulações</span>
@@ -106,12 +109,12 @@ export default function DashboardPage() {
 
         <div className="bg-[#1E293B] border border-slate-700 rounded-xl p-6">
           <h2 className="text-white font-semibold mb-4">Insights Automáticos</h2>
-          {insights.length === 0 ? (
+          {insightsList.length === 0 ? (
             <p className="text-slate-400 text-sm">Nenhum insight disponível</p>
           ) : (
             <ul className="space-y-3">
-              {insights.map((insight, i) => (
-                <li key={i} className={`border rounded-lg px-4 py-3 ${severityColors[insight.severity]}`}>
+              {insightsList.map((insight, i) => (
+                <li key={i} className={`border rounded-lg px-4 py-3 ${severityColors[insight.severity] ?? severityColors.info}`}>
                   <div className="font-medium text-sm">{insight.title}</div>
                   <div className="text-xs mt-1 opacity-80">{insight.description}</div>
                 </li>
